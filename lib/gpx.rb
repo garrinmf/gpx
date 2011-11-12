@@ -22,7 +22,7 @@
 #++
 $:.unshift(File.dirname(__FILE__))
 require 'rubygems'
-require 'hpricot'
+require 'nokogiri'
 require 'date'
 require 'time'
 require 'csv'

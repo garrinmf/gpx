@@ -52,9 +52,9 @@ module GPX
               #   gpx_file = File.open(gpx_file)
               #end
               gpx_file = gpx_file.name if gpx_file.is_a?(File) 
-              @xml = Hpricot(File.open(gpx_file))
+              @xml = Nokogiri::XML(File.open(gpx_file))
             else
-              @xml = Hpricot(opts[:gpx_data])
+              @xml = Nokogiri::XML(opts[:gpx_data])
             end
             # set XML namespace for XML find
             #if @xml.root.namespaces.namespace
@@ -62,9 +62,8 @@ module GPX
             #else
             #  @ns = 'gpx:http://www.topografix.com/GPX/1/1'  # default to GPX 1.1
             #end
-            
             reset_meta_data
-            bounds_element = (@xml.at("//metadata/bounds") rescue nil)
+            bounds_element = (@xml.at("//xmlns:metadata/bounds") rescue nil) 
             if bounds_element
                @bounds.min_lat = get_bounds_attr_value(bounds_element, %w{ min_lat minlat minLat })
                @bounds.min_lon = get_bounds_attr_value(bounds_element, %w{ min_lon minlon minLon})
@@ -74,21 +73,21 @@ module GPX
                get_bounds = true
             end
 
-		    @time = Time.parse(@xml.at("//metadata/time").inner_text) rescue nil
-			@name = @xml.at("//metadata/name").inner_text rescue nil
+		      @time = Time.parse(@xml.at_css("metadata time").inner_text) rescue nil
+			   @name = @xml.at_css("metadata name").inner_text rescue nil
             @tracks = [] 
-            @xml.search("//trk").each do |trk| 
+            @xml.css("trk").each do |trk| 
                trk = Track.new(:element => trk, :gpx_file => self) 
                update_meta_data(trk, get_bounds)
                @tracks << trk
             end
             @waypoints = [] 
-            @xml.search("//wpt").each { |wpt| @waypoints << Waypoint.new(:element => wpt, :gpx_file => self) }
+            @xml.css("wpt").each { |wpt| @waypoints << Waypoint.new(:element => wpt, :gpx_file => self) }
             @routes = []
-            @xml.search("//rte").each { |rte| @routes << Route.new(:element => rte, :gpx_file => self) }
+            @xml.css("rte").each { |rte| @routes << Route.new(:element => rte, :gpx_file => self) }
             @tracks.delete_if { |t| t.empty? }
 
-            calculate_duration
+            calculate_duration                        
          else
             reset_meta_data
             opts.each { |attr_name, value| instance_variable_set("@#{attr_name.to_s}", value) }
@@ -216,6 +215,12 @@ module GPX
 
       private 
       def generate_xml_doc
+         raise "Not implemented yet"
+         Nokogiri::XML::Builder.new do |xml| 
+            #do something here
+         end.to_xml
+=begin
+This was the old code
          doc = Document.new
          doc.root = Node.new('gpx')
          gpx_elem = doc.root
@@ -251,6 +256,7 @@ module GPX
          routes.each    { |r| gpx_elem << r.to_xml } unless routes.nil?
 
          return doc
+=end         
       end
 
       # Calculates and sets the duration attribute by subtracting the time on
