@@ -46,8 +46,8 @@ module GPX
          if(opts[:element])
             segment_element = opts[:element]
             last_pt = nil
-            if segment_element.is_a?(Hpricot::Elem)
-               segment_element.search("//trkpt").each do |trkpt| 
+            if segment_element.is_a?(Nokogiri::XML::Element)
+               segment_element.css("trkpt").each do |trkpt| 
                   pt = TrackPoint.new(:element => trkpt, :segment => self, :gpx_file => @gpx_file)  
                   unless pt.time.nil?
                      @earliest_point = pt if(@earliest_point.nil? or pt.time < @earliest_point.time)

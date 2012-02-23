@@ -41,8 +41,8 @@ module GPX
          reset_meta_data
          if(opts[:element]) 
             trk_element = opts[:element]
-            @name = (trk_element.at("//name").inner_text rescue "")
-            trk_element.search("//trkseg").each do |seg_element|
+            @name = (trk_element.css("name").inner_text rescue "")
+            trk_element.css("trkseg").each do |seg_element|
                seg = Segment.new(:element => seg_element, :track => self, :gpx_file => @gpx_file)
                update_meta_data(seg)
                @segments << seg

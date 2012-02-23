@@ -34,9 +34,9 @@ module GPX
 		if(opts[:gpx_file] and opts[:element])
          rte_element = opts[:element]
          @gpx_file = opts[:gpx_file]
-         @name = rte_element.at("//name").inner_text
+         @name = rte_element.at_css("name").inner_text
          @points = []
-         rte_element.search("//rtept").each do |point|
+         rte_element.css("rtept").each do |point|
 		   @points << Point.new(:element => point, :gpx_file => @gpx_file)
          end
 	   else
